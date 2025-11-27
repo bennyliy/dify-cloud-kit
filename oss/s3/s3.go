@@ -89,19 +89,20 @@ func NewS3Storage(args oss.OSSArgs) (oss.OSS, error) {
 			Credentials:  credProvider,
 			UsePathStyle: usePathStyle,
 			Region:       region,
-			EndpointResolver: s3.EndpointResolverFunc(
-				func(region string, options s3.EndpointResolverOptions) (aws.Endpoint, error) {
-					signingMethod := normalizeSignatureVersion(signatureVersion)
-					return aws.Endpoint{
-						URL:               endpoint,
-						HostnameImmutable: false,
-						SigningName:       "s3",
-						PartitionID:       "aws",
-						SigningRegion:     region,
-						SigningMethod:     signingMethod,
-						Source:            aws.EndpointSourceCustom,
-					}, nil
-				}),
+			BaseEndpoint: &endpoint,
+			// EndpointResolver: s3.EndpointResolverFunc(
+			// 	func(region string, options s3.EndpointResolverOptions) (aws.Endpoint, error) {
+			// 		signingMethod := normalizeSignatureVersion(signatureVersion)
+			// 		return aws.Endpoint{
+			// 			URL:               endpoint,
+			// 			HostnameImmutable: false,
+			// 			SigningName:       "s3",
+			// 			PartitionID:       "aws",
+			// 			SigningRegion:     region,
+			// 			SigningMethod:     signingMethod,
+			// 			Source:            aws.EndpointSourceCustom,
+			// 		}, nil
+			// 	}),
 		})
 	}
 
@@ -128,7 +129,7 @@ func normalizeSignatureVersion(version string) string {
 	case "unsigned":
 		return ""
 	case "":
-		return "v4"  // 默认使用 v4
+		return "v4" // 默认使用 v4
 	default:
 		return version
 	}
